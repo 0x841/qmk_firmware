@@ -310,7 +310,8 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
         case HLD_LOW:
             if (record->event.pressed && !is_low_pressed)
                 layer_off(_LOWER);
-            has_low_held = record->event.pressed;
+            else
+                has_low_held = record->event.pressed;
             return false;
             break;
 
