@@ -30,15 +30,16 @@
 
 extern keymap_config_t keymap_config;
 
-bool is_original  = true;
-bool is_swap_caps = false;
-bool is_mac       = false;
-bool is_jis       = false;
-bool rmods_enable = false;
+bool is_orig_layout_enabled = true;
+bool is_rmods_enabled = false;
+bool is_zhtg_replaced = false;
+bool is_capslock_swapped = false;
+bool is_mac = false;
+bool is_jis = false;
 
-bool is_caps;
-bool has_low_held;
-bool is_low_pressed;
+bool is_capslock_enable;
+bool is_lower_held;
+bool is_lower_pressed;
 
 #ifdef AUDIO_ENABLE
 float true_song[][2]  = TRUE_SONG;
@@ -62,12 +63,13 @@ enum layers {
 enum additional_keycodes {
     RAISE = SAFE_RANGE,
     LOWER,
+    HLD_LOW,
+    LAYO_TG,
     RMOD_TG,
+    ZHTG_TG,
     JIS_TG,
     SWP_CAP,
-    OS_TG,
-    LAYO_TG,
-    HLD_LOW
+    OS_TG
 };
 
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
@@ -186,9 +188,9 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
      * ,-----------------------------------------------------------------------------------.
      * |  F1  |  F2  |  F3  |  F4  |  F5  |  F6  |  F7  |  F8  |  F9  | F10  | F11  | F12  |
      * |------+------+------+------+------+------+------+------+------+------+------+------|
-     * | Ctrl |Insert| PtSc | ScLc |Pause |NumLc |      |      |      |      | Del  |RAISE |
+     * | Ctrl |Insert| PtSc | ScLc |Pause |NumLc |ZHTGTG|JIS_TG|      |OS_TGL|      |RAISE |
      * |------+------+------+------+------+------+------+------+------+------+------+------|
-     * |Shift |      |      |      |      |      |RMODTG|JIS_TG|SWPCAP|OS_TGL|LAYOTG|      |
+     * |Shift |      |      |SWPCAP|LAYOTG|      |      |RMODTG|      |      |      |      |
      * |------+------+------+------+------+------+------+------+------+------+------+------|
      * |Reset |      | GUI  | Alt  |LOWER |Space | Bksp |Enter |      |      |      |      |
      * `-----------------------------------------------------------------------------------'
@@ -196,8 +198,8 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
     [_EXTRA] = {
         {KC_F1,   KC_F2,   KC_F3,   KC_F4,   KC_F5,   KC_F6,   KC_F7,   KC_F8,   KC_F9,   KC_F10,  KC_F11,  KC_F12},
-        {_______, KC_INS,  KC_PSCR, KC_SLCK, KC_PAUS, KC_NLCK, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, KC_DEL,  _______},
-        {_______, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, RMOD_TG, JIS_TG,  SWP_CAP, OS_TG,   LAYO_TG, XXXXXXX},
+        {_______, KC_INS,  KC_PSCR, KC_SLCK, KC_PAUS, KC_NLCK, ZHTG_TG, JIS_TG,  XXXXXXX, OS_TG,   XXXXXXX, _______},
+        {_______, XXXXXXX, XXXXXXX, SWP_CAP, LAYO_TG, XXXXXXX, XXXXXXX, RMOD_TG, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX},
         {RESET,   XXXXXXX, _______, _______, _______, _______, _______, _______, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX}
     },
 
@@ -243,14 +245,14 @@ void tap_key(uint16_t kc) {
 }
 
 void set_base_layer(void) {
-    set_single_persistent_default_layer(is_original ? _ORIGINAL : _QWERTY);
+    set_single_persistent_default_layer(is_orig_layout_enabled ? _ORIGINAL : _QWERTY);
 }
 
 void set_mod_layer(void) {
     layer_off(_MOD_SC);
     layer_off(_MOD_MAC);
     layer_off(_MOD_SCM);
-    if (is_swap_caps) {
+    if (is_capslock_swapped) {
         if (is_mac)
             layer_on(_MOD_SCM);
         else
@@ -264,7 +266,7 @@ void set_mod_layer(void) {
 void switch_extra(void) {
     if (IS_RAISE_ON && IS_LOWER_ON) {
         layer_on(_EXTRA);
-        has_low_held = false;
+        is_lower_held = false;
     }
     else {
         layer_off(_EXTRA);
@@ -272,18 +274,18 @@ void switch_extra(void) {
 }
 
 void matrix_init_user(void) {
-    has_low_held = false;
-    is_low_pressed = false;
+    is_lower_held = false;
+    is_lower_pressed = false;
     set_base_layer();
     set_mod_layer();
 }
 
 void led_set_user(uint8_t usb_led) {
-    is_caps = usb_led & (1 << USB_LED_CAPS_LOCK);
+    is_capslock_enable = usb_led & (1 << USB_LED_CAPS_LOCK);
 }
 
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
-    uint16_t tmp_kc;
+    bool is_left_pressed, is_right_pressed;
     switch (keycode) {
         // layer
         case RAISE:
@@ -300,38 +302,45 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
         case LOWER:
             if (record->event.pressed)
                 layer_on(_LOWER);
-            else if (!has_low_held)
+            else if (!is_lower_held)
                 layer_off(_LOWER);
             switch_extra();
-            is_low_pressed = record->event.pressed;
+            is_lower_pressed = record->event.pressed;
             return false;
             break;
 
         case HLD_LOW:
-            if (record->event.pressed && !is_low_pressed)
+            if (record->event.pressed && !is_lower_pressed)
                 layer_off(_LOWER);
             else
-                has_low_held = record->event.pressed;
+                is_lower_held = record->event.pressed;
             return false;
             break;
 
         // Toggle settings
         case LAYO_TG:
             if (record->event.pressed) {
-                is_original = !is_original;
+                is_orig_layout_enabled = !is_orig_layout_enabled;
                 set_base_layer();
-                beep_bool(is_original);
+                beep_bool(is_orig_layout_enabled);
             }
             return false;
             break;
         case RMOD_TG:
             if (record->event.pressed) {
-                rmods_enable = !rmods_enable;
-                if (rmods_enable)
+                is_rmods_enabled = !is_rmods_enabled;
+                if (is_rmods_enabled)
                     layer_on(_RMODS);
                 else
                     layer_off(_RMODS);
-                beep_bool(rmods_enable);
+                beep_bool(is_rmods_enabled);
+            }
+            return false;
+            break;
+        case ZHTG_TG:
+            if (record->event.pressed) {
+                is_zhtg_replaced = !is_zhtg_replaced;
+                beep_bool(is_zhtg_replaced);
             }
             return false;
             break;
@@ -346,12 +355,12 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
             break;
         case SWP_CAP:
             if (record->event.pressed) {
-                is_swap_caps = !is_swap_caps;
+                is_capslock_swapped = !is_capslock_swapped;
                 set_mod_layer();
                 layer_on(is_jis ? _RAISE_JIS : _RAISE_US);
                 layer_on(_LOWER);
                 layer_on(_EXTRA);
-                beep_bool(is_swap_caps);
+                beep_bool(is_capslock_swapped);
             }
             return false;
             break;
@@ -388,12 +397,17 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
 
         // "_" for jis and capslock
         case KC_MINS:
-            if (IS_RAISE_OFF && record->event.pressed && (is_caps || (is_jis && HAS_SFT))) {
-                if (is_caps && HAS_SFT) {
-                    tmp_kc = HAS_LSFT ? KC_LSFT : KC_RSFT;
-                    unregister_code(tmp_kc);
+            if (record->event.pressed && (is_capslock_enable || (is_jis && HAS_SFT)) && IS_RAISE_OFF) {
+                if (is_capslock_enable && HAS_SFT) {
+                    is_left_pressed  = HAS_LSFT;
+                    is_right_pressed = HAS_RSFT;
+                    if (is_left_pressed)  unregister_code(KC_LSFT);
+                    if (is_right_pressed) unregister_code(KC_RSFT);
+
                     tap_key(KC_MINS);
-                    register_code(tmp_kc);
+
+                    if (is_left_pressed)  register_code(KC_LSFT);
+                    if (is_right_pressed) register_code(KC_RSFT);
                 }
                 else {
                     add_weak_mods(MOD_LSFT);
@@ -407,11 +421,41 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
 
         // ":" for jis
         case KC_SCLN:
-            if (is_jis && HAS_SFT && IS_RAISE_OFF && record->event.pressed) {
-                tmp_kc = HAS_LSFT ? KC_LSFT : KC_RSFT;
-                unregister_code(tmp_kc);
+            if (record->event.pressed && is_jis && HAS_SFT && IS_RAISE_OFF) {
+                is_left_pressed  = HAS_LSFT;
+                is_right_pressed = HAS_RSFT;
+                if (is_left_pressed)  unregister_code(KC_LSFT);
+                if (is_right_pressed) unregister_code(KC_RSFT);
+
                 tap_key(JP_COLN);
-                register_code(tmp_kc);
+
+                if (is_left_pressed)  register_code(KC_LSFT);
+                if (is_right_pressed) register_code(KC_RSFT);
+                return false;
+            }
+            return true;
+            break;
+
+        // replace "Ctrl-Space" when is_zhtg_replaced is true
+        case KC_SPC:
+            if (record->event.pressed && is_zhtg_replaced && HAS_CTL
+                    && IS_RAISE_OFF && IS_LOWER_OFF && !HAS_SFT && !HAS_GUI && !HAS_ALT) {
+                is_left_pressed  = HAS_LCTL;
+                is_right_pressed = HAS_RCTL;
+                if (is_left_pressed)  unregister_code(KC_LCTL);
+                if (is_right_pressed) unregister_code(KC_RCTL);
+
+                if (is_jis) {
+                    tap_key(JP_ZHTG);
+                }
+                else {
+                    add_weak_mods(MOD_LALT);
+                    tap_key(KC_GRV);
+                    del_weak_mods(MOD_LALT);
+                }
+
+                if (is_left_pressed)  register_code(KC_LCTL);
+                if (is_right_pressed) register_code(KC_RCTL);
                 return false;
             }
             return true;
