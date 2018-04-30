@@ -411,7 +411,7 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
                 }
                 else {
                     add_weak_mods(MOD_LSFT);
-                    tap_key(is_jis ? KC_BSLS : KC_MINS);
+                    tap_key(is_jis ? JP_BSLS : KC_MINS);
                     del_weak_mods(MOD_LSFT);
                 }
                 return false;
@@ -419,7 +419,14 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
             return true;
             break;
 
-        // ":" for jis
+        // "[" and ":" for jis
+        case KC_LBRC:
+            if (record->event.pressed && is_jis && IS_RAISE_OFF) {
+                tap_key(JP_LBRC);
+                return false;
+            }
+            return true;
+            break;
         case KC_SCLN:
             if (record->event.pressed && is_jis && HAS_SFT && IS_RAISE_OFF) {
                 is_left_pressed  = HAS_LSFT;
