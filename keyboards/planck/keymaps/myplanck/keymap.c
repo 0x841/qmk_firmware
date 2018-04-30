@@ -188,9 +188,9 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
      * ,-----------------------------------------------------------------------------------.
      * |  F1  |  F2  |  F3  |  F4  |  F5  |  F6  |  F7  |  F8  |  F9  | F10  | F11  | F12  |
      * |------+------+------+------+------+------+------+------+------+------+------+------|
-     * | Ctrl |Insert| PtSc | ScLc |Pause |NumLc |ZHTGTG|JIS_TG|      |OS_TGL|      |RAISE |
+     * | Ctrl | App  |      |      |      |      |      |JIS_TG|      |OS_TGL|Insert|RAISE |
      * |------+------+------+------+------+------+------+------+------+------+------+------|
-     * |Shift |      |      |SWPCAP|LAYOTG|      |      |RMODTG|      |      |      |      |
+     * |Shift |ZHTGTG|      |SWPCAP|LAYOTG|      |NumLc |RMODTG| PtSc | ScLc |Pause |      |
      * |------+------+------+------+------+------+------+------+------+------+------+------|
      * |Reset |      | GUI  | Alt  |LOWER |Space | Bksp |Enter |      |      |      |      |
      * `-----------------------------------------------------------------------------------'
@@ -198,8 +198,8 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
     [_EXTRA] = {
         {KC_F1,   KC_F2,   KC_F3,   KC_F4,   KC_F5,   KC_F6,   KC_F7,   KC_F8,   KC_F9,   KC_F10,  KC_F11,  KC_F12},
-        {_______, KC_INS,  KC_PSCR, KC_SLCK, KC_PAUS, KC_NLCK, ZHTG_TG, JIS_TG,  XXXXXXX, OS_TG,   XXXXXXX, _______},
-        {_______, XXXXXXX, XXXXXXX, SWP_CAP, LAYO_TG, XXXXXXX, XXXXXXX, RMOD_TG, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX},
+        {_______, KC_APP,  XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, JIS_TG,  XXXXXXX, OS_TG,   KC_INS,  _______},
+        {_______, ZHTG_TG, XXXXXXX, SWP_CAP, LAYO_TG, XXXXXXX, KC_NLCK, RMOD_TG, KC_PSCR, KC_SLCK, KC_PAUS, XXXXXXX},
         {RESET,   XXXXXXX, _______, _______, _______, _______, _______, _______, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX}
     },
 
