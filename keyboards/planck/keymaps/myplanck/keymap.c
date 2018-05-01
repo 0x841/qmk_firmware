@@ -397,7 +397,7 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
 
         // "_" for jis and capslock
         case KC_MINS:
-            if (record->event.pressed && (is_capslock_enable || (is_jis && HAS_SFT)) && IS_RAISE_OFF) {
+            if (record->event.pressed && ((is_jis && HAS_SFT) || is_capslock_enable) && IS_RAISE_OFF) {
                 if (is_capslock_enable && HAS_SFT) {
                     is_left_pressed  = HAS_LSFT;
                     is_right_pressed = HAS_RSFT;
