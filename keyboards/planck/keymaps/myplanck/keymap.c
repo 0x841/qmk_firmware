@@ -28,6 +28,8 @@
 #define HAS_RGUI (keyboard_report->mods & MOD_BIT(KC_RGUI))
 #define HAS_RALT (keyboard_report->mods & MOD_BIT(KC_RALT))
 
+#define IS_CAPSLOCK_ENABLE (host_keyboard_leds() & (1 << USB_LED_CAPS_LOCK))
+
 extern keymap_config_t keymap_config;
 
 bool is_orig_layout_enabled = true;
@@ -37,7 +39,6 @@ bool is_capslock_swapped = false;
 bool is_mac = false;
 bool is_jis = false;
 
-bool is_capslock_enable;
 bool is_lower_held;
 bool is_lower_pressed;
 
@@ -75,7 +76,7 @@ enum additional_keycodes {
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     /* Qwerty
      * ,-----------------------------------------------------------------------------------.
-     * |   (  |   Q  |   W  |   E  |   R  |   T  |   Y  |   U  |   I  |   O  |   P  |   [  |
+     * |   (  |   Q  |   W  |   E  |   R  |   T  |   Y  |   U  |   I  |   O  |   P  |   =  |
      * |------+------+------+------+------+------+------+------+------+------+------+------|
      * | Ctrl |   A  |   S  |   D  |   F  |   G  |   H  |   J  |   K  |   L  |   ;  |RAISE |
      * |------+------+------+------+------+------+------+------+------+------+------+------|
@@ -86,7 +87,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
      */
 
     [_QWERTY] = {
-        {KC_LPRN, KC_Q,    KC_W,    KC_E,    KC_R,    KC_T,    KC_Y,    KC_U,    KC_I,    KC_O,    KC_P,    KC_LBRC},
+        {KC_LPRN, KC_Q,    KC_W,    KC_E,    KC_R,    KC_T,    KC_Y,    KC_U,    KC_I,    KC_O,    KC_P,    KC_EQL},
         {KC_LCTL, KC_A,    KC_S,    KC_D,    KC_F,    KC_G,    KC_H,    KC_J,    KC_K,    KC_L,    KC_SCLN, RAISE},
         {KC_LSFT, KC_Z,    KC_X,    KC_C,    KC_V,    KC_B,    KC_N,    KC_M,    KC_COMM, KC_DOT,  KC_SLSH, KC_MINS},
         {KC_CAPS, NUMERIC, KC_LGUI, KC_LALT, LOWER,   KC_SPC,  KC_BSPC, KC_ENT,  KC_LEFT, KC_DOWN, KC_UP,   KC_RGHT}
@@ -94,21 +95,21 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
     /* Original
      * ,-----------------------------------------------------------------------------------.
-     * |   (  |   Y  |   W  |   E  |   R  |   T  |   Q  |   U  |   I  |   O  |   P  |   [  |
+     * |      |   Y  |   W  |   E  |   R  |   F  |   Q  |   U  |   I  |   O  |   P  |      |
      * |------+------+------+------+------+------+------+------+------+------+------+------|
-     * | Ctrl |   A  |   S  |   D  |   F  |   G  |   H  |   J  |   K  |   L  |   ;  |RAISE |
+     * |      |   A  |   S  |   D  |   T  |   G  |   H  |   J  |   K  |   L  |   ;  |      |
      * |------+------+------+------+------+------+------+------+------+------+------+------|
-     * |Shift |   Z  |   X  |   V  |   C  |   B  |   N  |   M  |   ,  |   .  |   /  |   -  |
+     * |      |   Z  |   X  |   V  |   C  |   B  |   N  |   M  |   ,  |   .  |   /  |      |
      * |------+------+------+------+------+------+------+------+------+------+------+------|
-     * | Caps | NUM  | GUI  | Alt  |LOWER |Space | Bksp |Enter | Left | Down |  Up  |Right |
+     * |      |      |      |      |      |      |      |      |      |      |      |      |
      * `-----------------------------------------------------------------------------------'
      */
 
     [_ORIGINAL] = {
-        {KC_LPRN, KC_Y,    KC_W,    KC_E,    KC_R,    KC_T,    KC_Q,    KC_U,    KC_I,    KC_O,    KC_P,    KC_LBRC},
-        {KC_LCTL, KC_A,    KC_S,    KC_D,    KC_F,    KC_G,    KC_H,    KC_J,    KC_K,    KC_L,    KC_SCLN, RAISE},
-        {KC_LSFT, KC_Z,    KC_X,    KC_V,    KC_C,    KC_B,    KC_N,    KC_M,    KC_COMM, KC_DOT,  KC_SLSH, KC_MINS},
-        {KC_CAPS, NUMERIC, KC_LGUI, KC_LALT, LOWER,   KC_SPC,  KC_BSPC, KC_ENT,  KC_LEFT, KC_DOWN, KC_UP,   KC_RGHT}
+        {_______, KC_Y,    KC_W,    KC_E,    KC_R,    KC_F,    KC_Q,    KC_U,    KC_I,    KC_O,    KC_P,    _______},
+        {_______, KC_A,    KC_S,    KC_D,    KC_T,    KC_G,    KC_H,    KC_J,    KC_K,    KC_L,    KC_SCLN, _______},
+        {_______, KC_Z,    KC_X,    KC_V,    KC_C,    KC_B,    KC_N,    KC_M,    KC_COMM, KC_DOT,  KC_SLSH, _______},
+        {_______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______}
     },
 
     /*          SwapCaps  Mac   SwapCaps & Mac
@@ -141,9 +142,9 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
     /* Raise
      * ,-----------------------------------------------------------------------------------.
-     * | Tab  |   !  |   @  |   #  |   $  |   %  |   ^  |   &  |   *  |   \  |   |  | Esc  |
+     * | Tab  |   !  |   @  |   #  |   $  |   %  |      |   ^  |   &  |   *  |  Del | Esc  |
      * |------+------+------+------+------+------+------+------+------+------+------+------|
-     * | Ctrl |   =  |   +  |   '  |   "  |   ]  |   }  |   `  |   ~  |      | Del  |RAISE |
+     * | Ctrl |   "  |   '  |   {  |   [  |   }  |   ]  |   |  |   \  |   ~  |   `  |RAISE |
      * |------+------+------+------+------+------+------+------+------+------+------+------|
      * |Shift |      |      |      |      |      |      |      |      |      |      |      |
      * |------+------+------+------+------+------+------+------+------+------+------+------|
@@ -152,15 +153,15 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
      */
 
     [_RAISE_US] = {
-        {KC_TAB,  KC_EXLM, KC_AT,   KC_HASH, KC_DLR,  KC_PERC, KC_CIRC, KC_AMPR, KC_ASTR, KC_BSLS, KC_PIPE, KC_ESC},
-        {_______, KC_EQL,  KC_PLUS, KC_QUOT, KC_DQT,  KC_RBRC, KC_RCBR, KC_GRV,  KC_TILD, XXXXXXX, KC_DEL,  _______},
+        {KC_TAB,  KC_EXLM, KC_AT,   KC_HASH, KC_DLR,  KC_PERC, XXXXXXX, KC_CIRC, KC_AMPR, KC_ASTR, KC_DEL,  KC_ESC},
+        {_______, KC_DQT,  KC_QUOT, KC_LCBR, KC_LBRC, KC_RCBR, KC_RBRC, KC_PIPE, KC_BSLS, KC_TILD, KC_GRV,  _______},
         {_______, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX},
         {XXXXXXX, XXXXXXX, _______, _______, _______, _______, _______, _______, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX}
     },
 
     [_RAISE_JIS] = {
-        {KC_TAB,  KC_EXLM, JP_AT,   KC_HASH, KC_DLR,  KC_PERC, JP_CIRC, JP_AMPR, JP_ASTR, JP_BSLS, JP_PIPE, KC_ESC},
-        {_______, JP_EQL,  JP_PLUS, JP_QUOT, JP_DQT,  JP_RBRC, JP_RCBR, JP_GRV,  JP_TILD, XXXXXXX, KC_DEL,  _______},
+        {KC_TAB,  KC_EXLM, JP_AT,   KC_HASH, KC_DLR,  KC_PERC, XXXXXXX, JP_CIRC, JP_AMPR, JP_ASTR, KC_DEL,  KC_ESC},
+        {_______, JP_DQT,  JP_QUOT, JP_LCBR, JP_LBRC, JP_RCBR, JP_RBRC, JP_PIPE, JP_BSLS, JP_TILD, JP_GRV,  _______},
         {_______, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX},
         {XXXXXXX, XXXXXXX, _______, _______, _______, _______, _______, _______, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX}
     },
@@ -232,10 +233,12 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
 void beep_bool(bool b) {
     #ifdef AUDIO_ENABLE
-    if (b)
+    if (b) {
         PLAY_SONG(true_song);
-    else
+    }
+    else {
         PLAY_SONG(false_song);
+    }
     #endif
 }
 
@@ -244,19 +247,38 @@ void tap_key(uint16_t kc) {
     unregister_code(kc);
 }
 
-void set_base_layer(void) {
-    set_single_persistent_default_layer(is_orig_layout_enabled ? _ORIGINAL : _QWERTY);
+void release_mods(void) {
+    unregister_code(KC_LCTL);
+    unregister_code(KC_RCTL);
+    unregister_code(KC_LSFT);
+    unregister_code(KC_RSFT);
+    unregister_code(KC_LGUI);
+    unregister_code(KC_RGUI);
+    unregister_code(KC_LALT);
+    unregister_code(KC_RALT);
 }
+
+void set_orig_layout(void) {
+    if (is_orig_layout_enabled) {
+        layer_on(_ORIGINAL);
+    }
+    else {
+        layer_off(_ORIGINAL);
+    }
+}
+
 
 void set_mod_layer(void) {
     layer_off(_MOD_SC);
     layer_off(_MOD_MAC);
     layer_off(_MOD_SCM);
     if (is_capslock_swapped) {
-        if (is_mac)
+        if (is_mac) {
             layer_on(_MOD_SCM);
-        else
+        }
+        else {
             layer_on(_MOD_SC);
+        }
     }
     else if (is_mac) {
         layer_on(_MOD_MAC);
@@ -276,12 +298,10 @@ void switch_extra(void) {
 void matrix_init_user(void) {
     is_lower_held = false;
     is_lower_pressed = false;
-    set_base_layer();
-    set_mod_layer();
-}
 
-void led_set_user(uint8_t usb_led) {
-    is_capslock_enable = usb_led & (1 << USB_LED_CAPS_LOCK);
+    set_single_persistent_default_layer(_QWERTY);
+    set_orig_layout();
+    set_mod_layer();
 }
 
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
@@ -300,20 +320,24 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
             return false;
             break;
         case LOWER:
-            if (record->event.pressed)
+            if (record->event.pressed) {
                 layer_on(_LOWER);
-            else if (!is_lower_held)
+            }
+            else if (!is_lower_held) {
                 layer_off(_LOWER);
+            }
             switch_extra();
             is_lower_pressed = record->event.pressed;
             return false;
             break;
 
         case HLD_LOW:
-            if (record->event.pressed && !is_lower_pressed)
+            if (record->event.pressed && !is_lower_pressed) {
                 layer_off(_LOWER);
-            else
+            }
+            else {
                 is_lower_held = record->event.pressed;
+            }
             return false;
             break;
 
@@ -321,7 +345,7 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
         case LAYO_TG:
             if (record->event.pressed) {
                 is_orig_layout_enabled = !is_orig_layout_enabled;
-                set_base_layer();
+                set_orig_layout();
                 beep_bool(is_orig_layout_enabled);
             }
             return false;
@@ -329,10 +353,12 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
         case RMOD_TG:
             if (record->event.pressed) {
                 is_rmods_enabled = !is_rmods_enabled;
-                if (is_rmods_enabled)
+                if (is_rmods_enabled) {
                     layer_on(_RMODS);
-                else
+                }
+                else {
                     layer_off(_RMODS);
+                }
                 beep_bool(is_rmods_enabled);
             }
             return false;
@@ -373,22 +399,39 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
             return false;
             break;
 
-        // replace "(" with "Tab" when pressed Ctrl or Alt
-        // replace "(" with  ")"  when pressed Shift
-        case KC_LPRN:
-            if (record->event.pressed) {
-                if (HAS_CTL || HAS_ALT) {
-                    tap_key(KC_TAB);
-                    return false;
+        // "=" for jis
+        case KC_EQL:
+            if (record->event.pressed && is_jis && IS_RAISE_OFF) {
+                if (HAS_SFT) {
+                    tap_key(KC_SCLN);
                 }
-                else if (HAS_SFT) {
-                    tap_key(is_jis ? KC_9 : KC_0);
-                    return false;
-                }
-                else if (is_jis) {
+                else {
                     add_weak_mods(MOD_LSFT);
-                    tap_key(KC_8);
+                    tap_key(JP_MINS);
                     del_weak_mods(MOD_LSFT);
+                }
+                return false;
+            }
+            return true;
+            break;
+
+        // ":" and for jis and Ctrl-; send Ctrl-[
+        case KC_SCLN:
+            if (record->event.pressed) {
+                if (HAS_CTL) {
+                    tap_key(KC_LBRC);
+                    return false;
+                }
+                else if (is_jis && HAS_SFT && IS_RAISE_OFF) {
+                    is_left_pressed  = HAS_LSFT;
+                    is_right_pressed = HAS_RSFT;
+                    if (is_left_pressed)  unregister_code(KC_LSFT);
+                    if (is_right_pressed) unregister_code(KC_RSFT);
+
+                    tap_key(JP_COLN);
+
+                    if (is_left_pressed)  register_code(KC_LSFT);
+                    if (is_right_pressed) register_code(KC_RSFT);
                     return false;
                 }
             }
@@ -397,8 +440,8 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
 
         // "_" for jis and capslock
         case KC_MINS:
-            if (record->event.pressed && ((is_jis && HAS_SFT) || is_capslock_enable) && IS_RAISE_OFF) {
-                if (is_capslock_enable && HAS_SFT) {
+            if (record->event.pressed && ((is_jis && HAS_SFT) || IS_CAPSLOCK_ENABLE) && IS_RAISE_OFF) {
+                if (IS_CAPSLOCK_ENABLE && HAS_SFT) {
                     is_left_pressed  = HAS_LSFT;
                     is_right_pressed = HAS_RSFT;
                     if (is_left_pressed)  unregister_code(KC_LSFT);
@@ -419,26 +462,24 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
             return true;
             break;
 
-        // "[" and ":" for jis
-        case KC_LBRC:
-            if (record->event.pressed && is_jis && IS_RAISE_OFF) {
-                tap_key(JP_LBRC);
-                return false;
-            }
-            return true;
-            break;
-        case KC_SCLN:
-            if (record->event.pressed && is_jis && HAS_SFT && IS_RAISE_OFF) {
-                is_left_pressed  = HAS_LSFT;
-                is_right_pressed = HAS_RSFT;
-                if (is_left_pressed)  unregister_code(KC_LSFT);
-                if (is_right_pressed) unregister_code(KC_RSFT);
-
-                tap_key(JP_COLN);
-
-                if (is_left_pressed)  register_code(KC_LSFT);
-                if (is_right_pressed) register_code(KC_RSFT);
-                return false;
+        // replace "(" with  ")"  when pressed Shift
+        // replace "(" with "Tab" when pressed Ctrl or Alt
+        case KC_LPRN:
+            if (record->event.pressed) {
+                if (HAS_CTL || HAS_ALT) {
+                    tap_key(KC_TAB);
+                    return false;
+                }
+                else if (HAS_SFT) {
+                    tap_key(is_jis ? KC_9 : KC_0);
+                    return false;
+                }
+                else if (is_jis) {
+                    add_weak_mods(MOD_LSFT);
+                    tap_key(KC_8);
+                    del_weak_mods(MOD_LSFT);
+                    return false;
+                }
             }
             return true;
             break;
