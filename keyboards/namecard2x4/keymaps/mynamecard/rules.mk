@@ -1,0 +1,2 @@
+BOOTLOADER = caterina
+MOUSEKEY_ENABLE = yes
