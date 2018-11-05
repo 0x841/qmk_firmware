@@ -1,7 +1,5 @@
 #include "helix.h"
 #include "bootloader.h"
-#include "action_layer.h"
-#include "eeconfig.h"
 #include "keymap_jp.h"
 
 #ifdef PROTOCOL_LUFA
@@ -103,7 +101,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     [_QWERTY] = LAYOUT( \
         KC_LPRN, KC_Q,    KC_W,    KC_E,    KC_R,    KC_T,                      KC_Y,    KC_U,    KC_I,    KC_O,    KC_P,    KC_EQL,  \
         KC_LCTL, KC_A,    KC_S,    KC_D,    KC_F,    KC_G,                      KC_H,    KC_J,    KC_K,    KC_L,    KC_SCLN, RAISE,   \
-        OSM_SFT, KC_Z,    KC_X,    KC_C,    KC_Y,    KC_B,                      KC_N,    KC_M,    KC_COMM, KC_DOT,  KC_SLSH, KC_MINS, \
+        OSM_SFT, KC_Z,    KC_X,    KC_C,    KC_V,    KC_B,                      KC_N,    KC_M,    KC_COMM, KC_DOT,  KC_SLSH, KC_MINS, \
         KC_CAPS, NUMERIC, KC_LGUI, KC_LALT, LOWER,   KC_SPC,  OLED_TG, OLED_TG, KC_BSPC, KC_ENT,  KC_LEFT, KC_DOWN, KC_UP,   KC_RGHT  \
     ),
 
@@ -156,13 +154,13 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
     /* Raise
      * ,-----------------------------------------.             ,-----------------------------------------.
-     * | Tab  |   !  |   @  |   #  |   $  |   %  |             |      |   ^  |   &  |   *  |  Del | Esc  |
+     * | Tab  |   !  |   @  |   #  |   $  |   %  |             |      |   ^  |   &  |   *  | Del  | Esc  |
      * |------+------+------+------+------+------|             |------+------+------+------+------+------|
      * | Ctrl |   "  |   '  |   {  |   [  |   }  |             |   ]  |   |  |   \  |   ~  |   `  |RAISE |
      * |------+------+------+------+------+------|             |------+------+------+------+------+------|
      * |Shift |      |      |      |      |      |             |      |      |      |      |      |      |
      * |------+------+------+------+------+------+-------------+------+------+------+------+------+------|
-     * |      |      | GUI  | Alt  |LOWER |Space |      |      |Bksp  |Enter |      |      |      |      |
+     * |      |      | GUI  | Alt  |LOWER |Space |      |      | Bksp |Enter |      |      |      |      |
      * `-------------------------------------------------------------------------------------------------'
      */
 
@@ -188,7 +186,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
      * |------+------+------+------+------+------|             |------+------+------+------+------+------|
      * |Shift |      |      |      |      |      |             |      |      |   ,  |   .  |HLDLOW|      |
      * |------+------+------+------+------+------+-------------+------+------+------+------+------+------|
-     * |      |      | GUI  | Alt  |LOWER |Space |      |      |Bksp  |Enter |      |      |      |      |
+     * |      |      | GUI  | Alt  |LOWER |Space |      |      | Bksp |Enter |      |      |      |      |
      * `-------------------------------------------------------------------------------------------------'
      */
 
@@ -207,7 +205,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
      * |------+------+------+------+------+------|             |------+------+------+------+------+------|
      * |Shift |ZHTGTG|      |SWPCAP|LAYOTG|      |             |NumLc |RMODTG| PtSc | ScLc |Pause |      |
      * |------+------+------+------+------+------+-------------+------+------+------+------+------+------|
-     * |Reset |      | GUI  | Alt  |LOWER |Space |      |      |Bksp  |Enter |      |      |      |      |
+     * |Reset |      | GUI  | Alt  |LOWER |Space |      |      | Bksp |Enter |      |      |      |      |
      * `-------------------------------------------------------------------------------------------------'
      */
 
@@ -537,8 +535,8 @@ void matrix_update(struct CharacterMatrix *dest, const struct CharacterMatrix *s
 
 void render_status(struct CharacterMatrix *matrix) {
     /* ,---------------------.
-     * |lo   US    [ Layer ] |
-     * |go Qwerty   NumLock  |
+     * |lo    US   [ Layer ] |
+     * |go  Qwerty  NumLock  |
      * |RMods EJRep CapsLock |
      * | SwapCaps ScrollLock |
      * `---------------------'
