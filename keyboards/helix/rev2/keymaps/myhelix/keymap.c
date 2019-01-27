@@ -50,7 +50,7 @@ bool is_orig_layout_enabled = true;
 bool is_rmods_enabled = false;
 bool is_zhtg_replaced = false;
 bool is_capslock_swapped = false;
-bool is_mac = false;
+bool is_mac = true;
 bool is_jis = false;
 
 bool is_oled_extra_on;
@@ -94,7 +94,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
      * |------+------+------+------+------+------|             |------+------+------+------+------+------|
      * |Shift |   Z  |   X  |   C  |   V  |   B  |             |   N  |   M  |   ,  |   .  |   /  |   -  |
      * |------+------+------+------+------+------+-------------+------+------+------+------+------+------|
-     * | Caps | NUM  | GUI  | Alt  |Lower |Space |OLEDTG|OLEDTG| Bksp |Enter | Left | Down |  Up  |Right |
+     * | Caps | NUM  | GUI  | Alt  |Lower |Space |      |OLEDTG| Bksp |Enter | Left | Down |  Up  |Right |
      * `-------------------------------------------------------------------------------------------------'
      */
 
@@ -102,7 +102,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
         KC_LPRN, KC_Q,    KC_W,    KC_E,    KC_R,    KC_T,                      KC_Y,    KC_U,    KC_I,    KC_O,    KC_P,    KC_EQL,  \
         KC_LCTL, KC_A,    KC_S,    KC_D,    KC_F,    KC_G,                      KC_H,    KC_J,    KC_K,    KC_L,    KC_SCLN, RAISE,   \
         OSM_SFT, KC_Z,    KC_X,    KC_C,    KC_V,    KC_B,                      KC_N,    KC_M,    KC_COMM, KC_DOT,  KC_SLSH, KC_MINS, \
-        KC_CAPS, NUMERIC, KC_LGUI, KC_LALT, LOWER,   KC_SPC,  OLED_TG, OLED_TG, KC_BSPC, KC_ENT,  KC_LEFT, KC_DOWN, KC_UP,   KC_RGHT  \
+        KC_CAPS, NUMERIC, KC_LGUI, KC_LALT, LOWER,   KC_SPC,  XXXXXXX, OLED_TG, KC_BSPC, KC_ENT,  KC_LEFT, KC_DOWN, KC_UP,   KC_RGHT  \
     ),
 
     /* Original
@@ -140,16 +140,16 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
     [_MOD_MAC] = LAYOUT( \
         _______, _______, _______, _______, _______, _______,                   _______, _______, _______, _______, _______, _______, \
-        KC_LGUI, _______, _______, _______, _______, _______,                   _______, _______, _______, _______, _______, _______, \
         _______, _______, _______, _______, _______, _______,                   _______, _______, _______, _______, _______, _______, \
-        _______, _______, KC_LALT, KC_LCTL, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______  \
+        _______, _______, _______, _______, _______, _______,                   _______, _______, _______, _______, _______, _______, \
+        _______, _______, XXXXXXX, KC_LALT, _______, _______, KC_LGUI, _______, _______, _______, _______, _______, _______, _______  \
     ),
 
     [_MOD_SCM] = LAYOUT( \
         _______, _______, _______, _______, _______, _______,                   _______, _______, _______, _______, _______, _______, \
-        KC_LGUI, _______, _______, _______, _______, _______,                   _______, _______, _______, _______, _______, _______, \
+        KC_CAPS, _______, _______, _______, _______, _______,                   _______, _______, _______, _______, _______, _______, \
         _______, _______, _______, _______, _______, _______,                   _______, _______, _______, _______, _______, _______, \
-        KC_LCTL, _______, KC_LALT, KC_CAPS, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______  \
+        KC_LCTL, _______, XXXXXXX, KC_LALT, _______, _______, KC_LGUI, _______, _______, _______, _______, _______, _______, _______  \
     ),
 
     /* Raise
@@ -419,7 +419,7 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
         // ":" and for jis and Ctrl-; send Ctrl-[
         case KC_SCLN:
             if (record->event.pressed) {
-                if (HAS_CTL) {
+                if (HAS_LCTL) {
                     tap_key(KC_LBRC);
                     return false;
                 }
@@ -467,7 +467,7 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
         // replace "(" with "Tab" when pressed Ctrl or Alt
         case KC_LPRN:
             if (record->event.pressed) {
-                if (HAS_CTL || HAS_ALT) {
+                if (HAS_CTL || HAS_ALT || HAS_GUI) {
                     tap_key(KC_TAB);
                     return false;
                 }
