@@ -462,7 +462,7 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
         // "PrintScreen" for Mac
         case KC_PSCR:
             if (record->event.pressed && config.is_mac) {
-                if (HAS_LCTL) {
+                if (HAS_CTL) {
                     is_left_pressed  = HAS_LCTL;
                     is_right_pressed = HAS_RCTL;
                     if (is_left_pressed)  unregister_code(KC_LCTL);
