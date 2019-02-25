@@ -43,12 +43,15 @@ bool is_oled_extra_on;
 bool is_lower_held;
 bool is_lower_pressed;
 bool is_reset_pressed;
+bool is_mods_swapped;
 bool flashed_eeprom;
 
 enum layers {
     _QWERTY,
     _ORIGINAL,
     _MOD_MAC,
+    _SWAP_MOD,
+    _SWAP_MAC_MOD,
     _RAISE_US,
     _RAISE_JIS,
     _LOWER,
@@ -65,6 +68,7 @@ enum custom_keycodes {
     JIS_TG,
     SWP_CAP,
     OS_TG,
+    MOD_TG,
     FLS_ROM,
     OLED_TG
 };
@@ -113,6 +117,20 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
         _______, _______, _______, _______, _______, _______,                   _______, _______, _______, _______, _______, _______, \
         _______, _______, _______, _______, _______, _______,                   _______, _______, _______, _______, _______, _______, \
                                             _______, _______, KC_LGUI, _______, _______, KC_LALT \
+    ),
+
+    [_SWAP_MOD] = LAYOUT( \
+        _______, _______, _______, _______, _______, _______,                   _______, _______, _______, _______, _______, _______, \
+        KC_RCTL, _______, _______, _______, _______, _______,                   _______, _______, _______, _______, _______, _______, \
+        KC_RSFT, _______, _______, _______, _______, _______,                   _______, _______, _______, _______, _______, _______, \
+                                            _______, _______, KC_RALT, _______, _______, KC_RGUI \
+    ),
+
+    [_SWAP_MAC_MOD] = LAYOUT( \
+        _______, _______, _______, _______, _______, _______,                   _______, _______, _______, _______, _______, _______, \
+        KC_RCTL, _______, _______, _______, _______, _______,                   _______, _______, _______, _______, _______, _______, \
+        KC_RSFT, _______, _______, _______, _______, _______,                   _______, _______, _______, _______, _______, _______, \
+                                            _______, _______, KC_RGUI, _______, _______, KC_RALT \
     ),
 
     /* Raise
@@ -166,7 +184,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
      * |------+------+------+------+------+------|                |------+------+------+------+------+------|
      * | Ctrl | App  |      |UPDROM|      |Reset |                |      |JIS_TG|      |OS_TGL|Insert|RAISE |
      * |------+------+------+------+------+------|                |------+------+------+------+------+------|
-     * |Shift |ZHTGTG|      |      |LAYOTG|      |                |NumLc |      | PtSc | ScLc |Pause |      |
+     * |Shift |ZHTGTG|      |      |LAYOTG|      |                |NumLc |SWPMOD| PtSc | ScLc |Pause |      |
      * `---------------------------+------+------+------.  ,------+------+------+---------------------------'
      *                             |LOWER |Space | Alt  |  | Bksp |Enter | GUI  |
      *                             `--------------------'  `--------------------'
@@ -175,7 +193,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     [_EXTRA] = LAYOUT( \
         KC_F1,   KC_F2,   KC_F3,   KC_F4,   KC_F5,   KC_F6,                     KC_F7,   KC_F8,   KC_F9,   KC_F10,  KC_F11,  KC_F12,  \
         _______, KC_APP,  XXXXXXX, FLS_ROM, XXXXXXX, RESET,                     XXXXXXX, JIS_TG,  XXXXXXX, OS_TG,   KC_INS,  _______, \
-        _______, ZHTG_TG, XXXXXXX, SWP_CAP, LAYO_TG, XXXXXXX,                   KC_NLCK, XXXXXXX, KC_PSCR, KC_SLCK, KC_PAUS, XXXXXXX, \
+        _______, ZHTG_TG, XXXXXXX, SWP_CAP, LAYO_TG, XXXXXXX,                   KC_NLCK, MOD_TG,  KC_PSCR, KC_SLCK, KC_PAUS, XXXXXXX, \
                                             _______, _______, _______, _______, _______, _______ \
     ),
 
@@ -225,10 +243,18 @@ void switch_extra(void) {
     }
 }
 
+void set_mod_layer(void) {
+    set_layer(_MOD_MAC,      config.is_mac && !is_mods_swapped);
+    set_layer(_SWAP_MOD,    !config.is_mac &&  is_mods_swapped);
+    set_layer(_SWAP_MAC_MOD, config.is_mac &&  is_mods_swapped);
+}
+
 void matrix_init_user(void) {
-    is_reset_pressed = false;
-    is_oled_extra_on = false;
+    is_lower_pressed = false;
     is_lower_held    = false;
+    is_oled_extra_on = false;
+    is_mods_swapped  = false;
+    is_reset_pressed = false;
     flashed_eeprom   = false;
 
     config.raw = eeconfig_read_user();
@@ -321,7 +347,15 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
         case OS_TG:
             if (record->event.pressed) {
                 config.is_mac ^= 1;
-                set_layer(_MOD_MAC, config.is_mac);
+                set_mod_layer();
+                is_oled_extra_on = true;
+            }
+            return false;
+            break;
+        case MOD_TG:
+            if (record->event.pressed) {
+                is_mods_swapped ^= 1;
+                set_mod_layer();
                 is_oled_extra_on = true;
             }
             return false;
@@ -451,7 +485,7 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
             }
             return true;
             break;
-        case JP_LCBR:
+        case JP_LBRC:
             if (record->event.pressed && config.is_jis && IS_RAISE_ON && HAS_CTL) {
                 tap_key(KC_SCLN);
                 return false;
@@ -522,8 +556,8 @@ void render_status(struct CharacterMatrix *matrix) {
     /* ,---------------------.
      * |lo    US   [ Layer ] |
      * |go  Qwerty  NumLock  |
-     * |   EJRep   CapsLock  |
-     * |          ScrollLock |
+     * | SwapMods  CapsLock  |
+     * |  EJRep   ScrollLock |
      * `---------------------'
      */
     static char os_logo[][2][3]={{{0x95, 0x96, 0}, {0xB5, 0xB6, 0}}, {{0x97, 0x98, 0}, {0xB7, 0xB8, 0}}};
@@ -549,17 +583,19 @@ void render_status(struct CharacterMatrix *matrix) {
     );
     matrix_write(matrix, led);
 
-    snprintf(led, sizeof(led), "   %s   %s\n",
-            config.is_zhtg_replaced ? "EJRep"
-                                    : "     ",
-            IS_CAPSLOCK_ENABLE      ? "CapsLock"
-                                    : "        "
+    snprintf(led, sizeof(led), " %s  %s\n",
+            is_mods_swapped    ? "SwapMods"
+                               : "        ",
+            IS_CAPSLOCK_ENABLE ? "CapsLock"
+                               : "        "
     );
     matrix_write(matrix, led);
 
-    snprintf(led, sizeof(led), "          %s",
-            IS_SCROLL_LOCK_ENABLE ? "ScrollLock"
-                                  : "          "
+    snprintf(led, sizeof(led), "  %s   %s",
+            config.is_zhtg_replaced ? "EJRep"
+                                    : "     ",
+            IS_SCROLL_LOCK_ENABLE   ? "ScrollLock"
+                                    : "          "
     );
     matrix_write(matrix, led);
 }
