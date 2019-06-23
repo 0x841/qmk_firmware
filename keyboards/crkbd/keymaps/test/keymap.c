@@ -69,7 +69,9 @@ enum custom_keycodes {
     OS_TG,
     MOD_TG,
     FLS_ROM,
-    OLED_TG
+    OLED_TG,
+    CTRL_S,
+    CTRL_T
 };
 
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
@@ -173,7 +175,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     [_LOWER] = LAYOUT( \
         KC_TAB,  KC_1,    KC_2,    KC_3,    KC_4,    KC_5,                      KC_6,    KC_7,    KC_8,    KC_9,    KC_0,    KC_ESC,  \
         _______, KC_HOME, KC_PGDN, KC_PGUP, KC_END,  XXXXXXX,                   KC_LEFT, KC_DOWN, KC_UP,   KC_RGHT, KC_DEL,  _______, \
-        _______, NUMERIC, XXXXXXX, XXXXXXX, HLD_LOW, OLED_TG,                   XXXXXXX, XXXXXXX, KC_COMM, KC_DOT,  HLD_LOW, XXXXXXX, \
+        _______, NUMERIC, CTRL_S,  CTRL_T,  HLD_LOW, OLED_TG,                   XXXXXXX, XXXXXXX, KC_COMM, KC_DOT,  HLD_LOW, XXXXXXX, \
                                             _______, _______, _______, _______, _______, _______ \
     ),
 
@@ -493,6 +495,36 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
                 return false;
             }
             return true;
+
+        case CTRL_S:
+            if (record->event.pressed) {
+                add_weak_mods(config.is_mac ? MOD_LGUI : MOD_LCTL);
+                tap_key(KC_S);
+                clear_weak_mods();
+            }
+            return false;
+        case CTRL_T:
+            if (record->event.pressed) {
+                if (HAS_LCTL) {
+                    is_left_pressed  = HAS_LCTL;
+                    is_right_pressed = HAS_RCTL;
+                    if (is_left_pressed)  unregister_code(KC_LCTL);
+                    if (is_right_pressed) unregister_code(KC_RCTL);
+
+                    add_weak_mods(MOD_LSFT | (config.is_mac ? MOD_LGUI : MOD_LCTL));
+                    tap_key(KC_T);
+                    clear_weak_mods();
+
+                    if (is_left_pressed)  register_code(KC_LCTL);
+                    if (is_right_pressed) register_code(KC_RCTL);
+                }
+                else {
+                    add_weak_mods(config.is_mac ? MOD_LGUI : MOD_LCTL);
+                    tap_key(KC_T);
+                    clear_weak_mods();
+                }
+            }
+            return false;
 
         case FLS_ROM:
             if (record->event.pressed) {
