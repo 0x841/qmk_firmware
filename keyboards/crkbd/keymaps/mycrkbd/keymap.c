@@ -284,7 +284,6 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
             }
             switch_extra();
             return false;
-            break;
         case LOWER:
             if (record->event.pressed) {
                 layer_on(_LOWER);
@@ -295,7 +294,6 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
             switch_extra();
             is_lower_pressed = record->event.pressed;
             return false;
-            break;
         case NUMERIC:
             if (record->event.pressed) {
                 if (IS_NUMERIC_ON) {
@@ -308,7 +306,6 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
                 }
             }
             return false;
-            break;
 
         case HLD_LOW:
             if (record->event.pressed && !is_lower_pressed) {
@@ -318,7 +315,6 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
                 is_lower_held = record->event.pressed;
             }
             return false;
-            break;
 
         case LAYO_TG:
             if (record->event.pressed) {
@@ -327,14 +323,12 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
                 is_oled_extra_on = true;
             }
             return false;
-            break;
         case ZHTG_TG:
             if (record->event.pressed) {
                 config.is_zhtg_replaced ^= 1;
                 is_oled_extra_on = true;
             }
             return false;
-            break;
         case JIS_TG:
             if (record->event.pressed) {
                 config.is_jis ^= 1;
@@ -343,7 +337,6 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
                 is_oled_extra_on = true;
             }
             return false;
-            break;
         case OS_TG:
             if (record->event.pressed) {
                 config.is_mac ^= 1;
@@ -351,7 +344,6 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
                 is_oled_extra_on = true;
             }
             return false;
-            break;
         case MOD_TG:
             if (record->event.pressed) {
                 is_mods_swapped ^= 1;
@@ -359,13 +351,11 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
                 is_oled_extra_on = true;
             }
             return false;
-            break;
         case OLED_TG:
             if (record->event.pressed) {
                 config.is_oled_on ^= 1;
             }
             return false;
-            break;
 
         // "=" for jis
         case KC_EQL:
@@ -381,13 +371,14 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
                 return false;
             }
             return true;
-            break;
 
-        // ":" and for jis and "Ctrl-;" send "Ctrl-["
+        // ":" and for jis and "Ctrl-;" send "Esc"
         case KC_SCLN:
             if (record->event.pressed && IS_RAISE_OFF) {
-                if (HAS_CTL) {
-                    tap_key(KC_LBRC);
+                if (HAS_LCTL) {
+                    unregister_code(KC_LCTL);
+                    tap_key(KC_ESC);
+                    register_code(KC_LCTL);
                     return false;
                 }
                 else if (config.is_jis && HAS_SFT) {
@@ -404,7 +395,6 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
                 }
             }
             return true;
-            break;
 
         // "_" for jis and capslock
         case KC_MINS:
@@ -428,7 +418,6 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
                 return false;
             }
             return true;
-            break;
 
         // replace "(" with  ")"  when pressed Shift
         // replace "(" with "Tab" when pressed Ctrl or Alt
@@ -450,7 +439,6 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
                 }
             }
             return true;
-            break;
 
         // replace "Ctrl-Space" when is_zhtg_replaced is true
         case KC_SPC:
@@ -475,7 +463,6 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
                 return false;
             }
             return true;
-            break;
 
         // "Ctrl-[" send "Ctrl-;"
         case KC_LBRC:
@@ -484,14 +471,12 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
                 return false;
             }
             return true;
-            break;
         case JP_LBRC:
             if (record->event.pressed && config.is_jis && IS_RAISE_ON && HAS_CTL) {
                 tap_key(KC_SCLN);
                 return false;
             }
             return true;
-            break;
 
         // "PrintScreen" for Mac
         case KC_PSCR:
@@ -517,7 +502,6 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
                 return false;
             }
             return true;
-            break;
 
         case FLS_ROM:
             if (record->event.pressed) {
@@ -526,7 +510,6 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
                 is_oled_extra_on = true;
             }
             return false;
-            break;
 
         case RESET:
             if (record->event.pressed) {
@@ -534,9 +517,10 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
                 matrix_scan();
             }
             return true;
-            break;
+
+        default:
+            return true;
     }
-    return true;
 }
 
 //SSD1306 OLED update loop, make sure to add #define SSD1306OLED in config.h
