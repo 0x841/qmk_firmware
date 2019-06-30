@@ -12,7 +12,9 @@
 #include "ssd1306.h"
 #endif
 
+#define OSM_SFT OSM(MOD_LSFT)
 #define NUMERIC TG(_NUMERIC)
+#define TD_LPRN TD(RP_LPRN)
 
 #define IS_RAISE_ON  (IS_LAYER_ON(_RAISE_US)  || IS_LAYER_ON(_RAISE_JIS))
 #define IS_RAISE_OFF (IS_LAYER_OFF(_RAISE_US) && IS_LAYER_OFF(_RAISE_JIS))
@@ -69,9 +71,11 @@ enum custom_keycodes {
     OS_TG,
     MOD_TG,
     FLS_ROM,
-    OLED_TG,
-    CTRL_S,
-    CTRL_T
+    OLED_TG
+};
+
+enum tap_dance {
+    RP_LPRN
 };
 
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
@@ -81,17 +85,17 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
      * |------+------+------+------+------+------|                |------+------+------+------+------+------|
      * | Ctrl |   A  |   S  |   D  |   F  |   G  |                |   H  |   J  |   K  |   L  |   ;  |RAISE |
      * |------+------+------+------+------+------|                |------+------+------+------+------+------|
-     * | Alt  |   Z  |   X  |   C  |   V  |   B  |                |   N  |   M  |   ,  |   .  |   /  |   -  |
+     * |Shift |   Z  |   X  |   C  |   V  |   B  |                |   N  |   M  |   ,  |   .  |   /  |   -  |
      * `---------------------------+------+------+------.  ,------+------+------+---------------------------'
-     *                             |LOWER |Space |Shift |  | Bksp |Enter | GUI  |
+     *                             |LOWER |Space | Alt  |  | Bksp |Enter | GUI  |
      *                             `--------------------'  `--------------------'
      */
 
     [_QWERTY] = LAYOUT( \
-        KC_LPRN, KC_C,    KC_O,    KC_U,    KC_W,    KC_X,                      KC_Q,    KC_R,    KC_T,    KC_N,    KC_SCLN, KC_EQL,  \
-        KC_LCTL, KC_A,    KC_E,    KC_F,    KC_I,    KC_Y,                      KC_H,    KC_J,    KC_K,    KC_L,    KC_S,    RAISE,   \
-        KC_LALT, KC_COMM, KC_DOT,  KC_SLSH, KC_Z,    KC_V,                      KC_P,    KC_M,    KC_B,    KC_G,    KC_D,    KC_MINS, \
-                                            LOWER,   KC_SPC,  KC_LSFT, KC_BSPC, KC_ENT,  KC_LGUI \
+        TD_LPRN, KC_Q,    KC_W,    KC_E,    KC_R,    KC_T,                      KC_Y,    KC_U,    KC_I,    KC_O,    KC_P,    KC_EQL,  \
+        KC_LCTL, KC_A,    KC_S,    KC_D,    KC_F,    KC_G,                      KC_H,    KC_J,    KC_K,    KC_L,    KC_SCLN, RAISE,   \
+        OSM_SFT, KC_Z,    KC_X,    KC_C,    KC_V,    KC_B,                      KC_N,    KC_M,    KC_COMM, KC_DOT,  KC_SLSH, KC_MINS, \
+                                            LOWER,   KC_SPC,  KC_LALT, KC_BSPC, KC_ENT,  KC_LGUI \
     ),
 
     /* Orignal
@@ -116,22 +120,22 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     [_MOD_MAC] = LAYOUT( \
         _______, _______, _______, _______, _______, _______,                   _______, _______, _______, _______, _______, _______, \
         _______, _______, _______, _______, _______, _______,                   _______, _______, _______, _______, _______, _______, \
-        KC_LGUI, _______, _______, _______, _______, _______,                   _______, _______, _______, _______, _______, _______, \
-                                            _______, _______, _______, _______, _______, KC_LALT \
+        _______, _______, _______, _______, _______, _______,                   _______, _______, _______, _______, _______, _______, \
+                                            _______, _______, KC_LGUI, _______, _______, KC_LALT \
     ),
 
     [_SWAP_MOD] = LAYOUT( \
         _______, _______, _______, _______, _______, _______,                   _______, _______, _______, _______, _______, _______, \
         KC_RCTL, _______, _______, _______, _______, _______,                   _______, _______, _______, _______, _______, _______, \
-        KC_RALT, _______, _______, _______, _______, _______,                   _______, _______, _______, _______, _______, _______, \
-                                            _______, _______, KC_RSFT, _______, _______, KC_RGUI \
+        KC_RSFT, _______, _______, _______, _______, _______,                   _______, _______, _______, _______, _______, _______, \
+                                            _______, _______, KC_RALT, _______, _______, KC_RGUI \
     ),
 
     [_SWAP_MAC_MOD] = LAYOUT( \
         _______, _______, _______, _______, _______, _______,                   _______, _______, _______, _______, _______, _______, \
         KC_RCTL, _______, _______, _______, _______, _______,                   _______, _______, _______, _______, _______, _______, \
-        KC_RGUI, _______, _______, _______, _______, _______,                   _______, _______, _______, _______, _______, _______, \
-                                            _______, _______, KC_RSFT, _______, _______, KC_RALT \
+        KC_RSFT, _______, _______, _______, _______, _______,                   _______, _______, _______, _______, _______, _______, \
+                                            _______, _______, KC_RGUI, _______, _______, KC_RALT \
     ),
 
     /* Raise
@@ -140,9 +144,9 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
      * |------+------+------+------+------+------|                |------+------+------+------+------+------|
      * | Ctrl |   "  |   '  |   {  |   [  |   }  |                |   ]  |   |  |   \  |   ~  |   `  |RAISE |
      * |------+------+------+------+------+------|                |------+------+------+------+------+------|
-     * | Alt  |      |      |      |      | Caps |                |      |      |      |      |      |      |
+     * |Shift |      |      |      |      | Caps |                |      |      |      |      |      |      |
      * `---------------------------+------+------+------.  ,------+------+------+---------------------------'
-     *                             |LOWER |Space |Shift |  | Bksp |Enter | GUI  |
+     *                             |LOWER |Space | Alt  |  | Bksp |Enter | GUI  |
      *                             `--------------------'  `--------------------'
      */
 
@@ -166,16 +170,16 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
      * |------+------+------+------+------+------|                |------+------+------+------+------+------|
      * | Ctrl | Home | PgDn | PgUp | End  |      |                | Left | Down |  Up  |Right | Del  |RAISE |
      * |------+------+------+------+------+------|                |------+------+------+------+------+------|
-     * | Alt  | NUM  |      |      |HLDLOW|OLEDTG|                |      |      |   ,  |   .  |HLDLOW|      |
+     * |Shift | NUM  |      |      |HLDLOW|OLEDTG|                |      |      |   ,  |   .  |HLDLOW|      |
      * `---------------------------+------+------+------.  ,------+------+------+---------------------------'
-     *                             |LOWER |Space |Shift |  | Bksp |Enter | GUI  |
+     *                             |LOWER |Space | Alt  |  | Bksp |Enter | GUI  |
      *                             `--------------------'  `--------------------'
      */
 
     [_LOWER] = LAYOUT( \
         KC_TAB,  KC_1,    KC_2,    KC_3,    KC_4,    KC_5,                      KC_6,    KC_7,    KC_8,    KC_9,    KC_0,    KC_ESC,  \
         _______, KC_HOME, KC_PGDN, KC_PGUP, KC_END,  XXXXXXX,                   KC_LEFT, KC_DOWN, KC_UP,   KC_RGHT, KC_DEL,  _______, \
-        _______, NUMERIC, CTRL_S,  CTRL_T,  HLD_LOW, OLED_TG,                   XXXXXXX, XXXXXXX, KC_COMM, KC_DOT,  HLD_LOW, XXXXXXX, \
+        _______, NUMERIC, XXXXXXX, XXXXXXX, HLD_LOW, OLED_TG,                   XXXXXXX, XXXXXXX, KC_COMM, KC_DOT,  HLD_LOW, XXXXXXX, \
                                             _______, _______, _______, _______, _______, _______ \
     ),
 
@@ -185,9 +189,9 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
      * |------+------+------+------+------+------|                |------+------+------+------+------+------|
      * | Ctrl | App  |      |UPDROM|      |Reset |                |      |JIS_TG|      |OS_TGL|Insert|RAISE |
      * |------+------+------+------+------+------|                |------+------+------+------+------+------|
-     * | Alt  |ZHTGTG|      |      |LAYOTG|      |                |NumLc |SWPMOD| PtSc | ScLc |Pause |      |
+     * |Shift |ZHTGTG|      |      |LAYOTG|      |                |NumLc |SWPMOD| PtSc | ScLc |Pause |      |
      * `---------------------------+------+------+------.  ,------+------+------+---------------------------'
-     *                             |LOWER |Space |Shift |  | Bksp |Enter | GUI  |
+     *                             |LOWER |Space | Alt  |  | Bksp |Enter | GUI  |
      *                             `--------------------'  `--------------------'
      */
 
@@ -271,6 +275,29 @@ void matrix_init_user(void) {
         #endif
     #endif
 }
+
+void lprn_each(qk_tap_dance_state_t *state, void *user_data) {
+    if (HAS_CTL || HAS_ALT || HAS_GUI) {
+        tap_key(KC_TAB);
+    }
+    else if (HAS_SFT) {
+        tap_key(config.is_jis ? KC_9 : KC_0);
+    }
+    else {
+        add_weak_mods(MOD_LSFT);
+        if (state->count % 2 != 0) {
+            tap_key(config.is_jis ? KC_8 : KC_9);
+        }
+        else {
+            tap_key(config.is_jis ? KC_9 : KC_0);
+        }
+        clear_weak_mods();
+    }
+}
+
+qk_tap_dance_action_t tap_dance_actions[] = {
+    [RP_LPRN] = ACTION_TAP_DANCE_FN_ADVANCED(lprn_each, NULL, NULL)
+};
 
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
     bool is_left_pressed, is_right_pressed;
@@ -376,16 +403,10 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
         // ":" and for jis and "Ctrl-;" send "Esc"
         case KC_SCLN:
             if (record->event.pressed && IS_RAISE_OFF) {
-                if (HAS_CTL) {
-                    is_left_pressed  = HAS_LCTL;
-                    is_right_pressed = HAS_RCTL;
-                    if (is_left_pressed)  unregister_code(KC_LCTL);
-                    if (is_right_pressed) unregister_code(KC_RCTL);
-
+                if (HAS_LCTL) {
+                    unregister_code(KC_LCTL);
                     tap_key(KC_ESC);
-
-                    if (is_left_pressed)  register_code(KC_LCTL);
-                    if (is_right_pressed) register_code(KC_RCTL);
+                    register_code(KC_LCTL);
                     return false;
                 }
                 else if (config.is_jis && HAS_SFT) {
@@ -426,27 +447,6 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
             }
             return true;
 
-        // replace "(" with  ")"  when pressed Shift
-        // replace "(" with "Tab" when pressed Ctrl or Alt
-        case KC_LPRN:
-            if (record->event.pressed) {
-                if (HAS_CTL || HAS_ALT || HAS_GUI) {
-                    tap_key(KC_TAB);
-                    return false;
-                }
-                else if (HAS_SFT) {
-                    tap_key(config.is_jis ? KC_9 : KC_0);
-                    return false;
-                }
-                else if (config.is_jis) {
-                    add_weak_mods(MOD_LSFT);
-                    tap_key(KC_8);
-                    clear_weak_mods();
-                    return false;
-                }
-            }
-            return true;
-
         // replace "Ctrl-Space" when is_zhtg_replaced is true
         case KC_SPC:
             if (record->event.pressed && config.is_zhtg_replaced && HAS_CTL
@@ -467,6 +467,20 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
 
                 if (is_left_pressed)  register_code(KC_LCTL);
                 if (is_right_pressed) register_code(KC_RCTL);
+                return false;
+            }
+            return true;
+
+        // "Ctrl-[" send "Ctrl-;"
+        case KC_LBRC:
+            if (record->event.pressed && !config.is_jis && IS_RAISE_ON && HAS_CTL) {
+                tap_key(KC_SCLN);
+                return false;
+            }
+            return true;
+        case JP_LBRC:
+            if (record->event.pressed && config.is_jis && IS_RAISE_ON && HAS_CTL) {
+                tap_key(KC_SCLN);
                 return false;
             }
             return true;
@@ -496,36 +510,6 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
             }
             return true;
 
-        case CTRL_S:
-            if (record->event.pressed) {
-                add_weak_mods(config.is_mac ? MOD_LGUI : MOD_LCTL);
-                tap_key(KC_S);
-                clear_weak_mods();
-            }
-            return false;
-        case CTRL_T:
-            if (record->event.pressed) {
-                if (HAS_LCTL) {
-                    is_left_pressed  = HAS_LCTL;
-                    is_right_pressed = HAS_RCTL;
-                    if (is_left_pressed)  unregister_code(KC_LCTL);
-                    if (is_right_pressed) unregister_code(KC_RCTL);
-
-                    add_weak_mods(MOD_LSFT | (config.is_mac ? MOD_LGUI : MOD_LCTL));
-                    tap_key(KC_T);
-                    clear_weak_mods();
-
-                    if (is_left_pressed)  register_code(KC_LCTL);
-                    if (is_right_pressed) register_code(KC_RCTL);
-                }
-                else {
-                    add_weak_mods(config.is_mac ? MOD_LGUI : MOD_LCTL);
-                    tap_key(KC_T);
-                    clear_weak_mods();
-                }
-            }
-            return false;
-
         case FLS_ROM:
             if (record->event.pressed) {
                 eeconfig_update_user(config.raw);
@@ -540,6 +524,7 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
                 matrix_scan();
             }
             return true;
+
         default:
             return true;
     }
