@@ -14,6 +14,7 @@
 
 #define OSM_SFT OSM(MOD_LSFT)
 #define NUMERIC TG(_NUMERIC)
+#define TD_LPRN TD(RP_LPRN)
 
 #define IS_RAISE_ON  (IS_LAYER_ON(_RAISE_US)  || IS_LAYER_ON(_RAISE_JIS))
 #define IS_RAISE_OFF (IS_LAYER_OFF(_RAISE_US) && IS_LAYER_OFF(_RAISE_JIS))
@@ -73,6 +74,10 @@ enum custom_keycodes {
     OLED_TG
 };
 
+enum tap_dance {
+    RP_LPRN
+};
+
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     /* Qwerty
      * ,-----------------------------------------.                ,-----------------------------------------.
@@ -87,7 +92,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
      */
 
     [_QWERTY] = LAYOUT( \
-        KC_LPRN, KC_Q,    KC_W,    KC_E,    KC_R,    KC_T,                      KC_Y,    KC_U,    KC_I,    KC_O,    KC_P,    KC_EQL,  \
+        TD_LPRN, KC_Q,    KC_W,    KC_E,    KC_R,    KC_T,                      KC_Y,    KC_U,    KC_I,    KC_O,    KC_P,    KC_EQL,  \
         KC_LCTL, KC_A,    KC_S,    KC_D,    KC_F,    KC_G,                      KC_H,    KC_J,    KC_K,    KC_L,    KC_SCLN, RAISE,   \
         OSM_SFT, KC_Z,    KC_X,    KC_C,    KC_V,    KC_B,                      KC_N,    KC_M,    KC_COMM, KC_DOT,  KC_SLSH, KC_MINS, \
                                             LOWER,   KC_SPC,  KC_LALT, KC_BSPC, KC_ENT,  KC_LGUI \
@@ -271,6 +276,29 @@ void matrix_init_user(void) {
     #endif
 }
 
+void lprn_each(qk_tap_dance_state_t *state, void *user_data) {
+    if (HAS_CTL || HAS_ALT || HAS_GUI) {
+        tap_key(KC_TAB);
+    }
+    else if (HAS_SFT) {
+        tap_key(config.is_jis ? KC_9 : KC_0);
+    }
+    else {
+        add_weak_mods(MOD_LSFT);
+        if (state->count % 2 != 0) {
+            tap_key(config.is_jis ? KC_8 : KC_9);
+        }
+        else {
+            tap_key(config.is_jis ? KC_9 : KC_0);
+        }
+        clear_weak_mods();
+    }
+}
+
+qk_tap_dance_action_t tap_dance_actions[] = {
+    [RP_LPRN] = ACTION_TAP_DANCE_FN_ADVANCED(lprn_each, NULL, NULL)
+};
+
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
     bool is_left_pressed, is_right_pressed;
     switch (keycode) {
@@ -416,27 +444,6 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
                     clear_weak_mods();
                 }
                 return false;
-            }
-            return true;
-
-        // replace "(" with  ")"  when pressed Shift
-        // replace "(" with "Tab" when pressed Ctrl or Alt
-        case KC_LPRN:
-            if (record->event.pressed) {
-                if (HAS_CTL || HAS_ALT || HAS_GUI) {
-                    tap_key(KC_TAB);
-                    return false;
-                }
-                else if (HAS_SFT) {
-                    tap_key(config.is_jis ? KC_9 : KC_0);
-                    return false;
-                }
-                else if (config.is_jis) {
-                    add_weak_mods(MOD_LSFT);
-                    tap_key(KC_8);
-                    clear_weak_mods();
-                    return false;
-                }
             }
             return true;
 
