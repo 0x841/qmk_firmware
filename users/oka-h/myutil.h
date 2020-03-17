@@ -20,4 +20,7 @@
 #define IS_CAPSLOCK_ENABLE    (host_keyboard_leds() & (1 << USB_LED_CAPS_LOCK))
 #define IS_SCROLL_LOCK_ENABLE (host_keyboard_leds() & (1 << USB_LED_SCROLL_LOCK))
 
+void send_integer(uint32_t);
+void send_one_int(int);
+
 #endif
